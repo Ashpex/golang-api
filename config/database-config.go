@@ -20,8 +20,12 @@ func SetupDatabaseConnection() *gorm.DB {
 	if err != nil {
 		panic("Failed to create a connection to database")
 	}
+	if err != nil {
+		panic("Failed to setup join table")
+	}
+	err = db.SetupJoinTable(&entity.User{}, "user_groups", &entity.UserGroup{})
+	db.AutoMigrate(&entity.User{}, &entity.Group{}, &entity.UserGroup{}, &entity.Log{})
 
-	db.AutoMigrate(&entity.User{})
 	println("Database connected!")
 	return db
 }
