@@ -40,7 +40,7 @@ func (db *groupConnection) DeleteGroup(g entity.Group) {
 
 func (db *groupConnection) AllGroup() []entity.Group {
 	var groups []entity.Group
-	db.connection.Preload("Users").Find(&groups)
+	db.connection.Find(&groups)
 	return groups
 }
 

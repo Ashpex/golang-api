@@ -9,5 +9,5 @@ type User struct {
 	VerificationCode string   `gorm:"->;<-;not null" json:"-"`
 	Verified         bool     `gorm:"default:false" json:"verified"`
 	Token            string   `gorm:"-" json:"token,omitempty"`
-	Groups           *[]Group `gorm:"many2many:user_groups" json:"groups"`
+	Groups           *[]Group `gorm:"many2many:user_groups" json:"groups,omitempty"`
 }

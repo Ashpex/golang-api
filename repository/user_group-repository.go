@@ -11,6 +11,7 @@ type UserGroupRepository interface {
 	DeleteUserGroup(g entity.UserGroup)
 	AllUserGroup() []entity.UserGroup
 	FindUserGroupByID(userID uint64, groupID uint64) entity.UserGroup
+	FindByGroupID(groupID uint64) []entity.UserGroup
 }
 
 type userGroupConnection struct {
@@ -51,4 +52,10 @@ func (db *userGroupConnection) FindUserGroupByID(userID uint64, groupID uint64) 
 	var userGroup entity.UserGroup
 	db.connection.Preload("Users").Find(&userGroup, userID, groupID)
 	return userGroup
+}
+
+func (db *userGroupConnection) FindByGroupID(groupID uint64) []entity.UserGroup {
+	var userGroups []entity.UserGroup
+	db.connection.Preload("Users").Find(&userGroups, groupID)
+	return userGroups
 }

@@ -10,6 +10,7 @@ type UserGroupService interface {
 	JoinGroup(userID uint64, groupID uint64) entity.UserGroup
 	LeaveGroup(userID uint64, groupID uint64)
 	FindUserGroupByID(userID uint64, groupID uint64) entity.UserGroup
+	FindByGroupID(groupID uint64) []entity.UserGroup
 }
 
 func NewUserGroupService(userGroupRepo repository.UserGroupRepository) UserGroupService {
@@ -47,4 +48,8 @@ func (service *userGroupService) LeaveGroup(userID uint64, groupID uint64) {
 
 func (service *userGroupService) FindUserGroupByID(userID uint64, groupID uint64) entity.UserGroup {
 	return service.userGroupRepository.FindUserGroupByID(userID, groupID)
+}
+
+func (service *userGroupService) FindByGroupID(groupID uint64) []entity.UserGroup {
+	return service.userGroupRepository.FindByGroupID(groupID)
 }

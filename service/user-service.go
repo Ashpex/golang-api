@@ -12,6 +12,7 @@ import (
 type UserService interface {
 	Update(user dto.UserUpdateDTO) entity.User
 	Profile(userID string) entity.User
+	FindByID(userID int64) entity.User
 }
 
 type userService struct {
@@ -37,4 +38,8 @@ func (service *userService) Update(user dto.UserUpdateDTO) entity.User {
 
 func (service *userService) Profile(userID string) entity.User {
 	return service.userRepository.ProfileUser(userID)
+}
+
+func (service *userService) FindByID(userID int64) entity.User {
+	return service.userRepository.FindByID(userID)
 }

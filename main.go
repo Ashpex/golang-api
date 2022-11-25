@@ -14,13 +14,18 @@ import (
 )
 
 var (
-	db             *gorm.DB                  = config.SetupDatabaseConnection()
-	userRepository repository.UserRepository = repository.NewUserRepository(db)
-	jwtService     service.JWTService        = service.NewJWTService()
-	userService    service.UserService       = service.NewUserService(userRepository)
-	authService    service.AuthService       = service.NewAuthService(userRepository)
-	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
-	userController controller.UserController = controller.NewUserController(userService, jwtService)
+	db                  *gorm.DB                       = config.SetupDatabaseConnection()
+	userRepository      repository.UserRepository      = repository.NewUserRepository(db)
+	groupRepository     repository.GroupRepository     = repository.NewGroupRepository(db)
+	userGroupRepository repository.UserGroupRepository = repository.NewUserGroupRepository(db)
+	jwtService          service.JWTService             = service.NewJWTService()
+	userService         service.UserService            = service.NewUserService(userRepository)
+	authService         service.AuthService            = service.NewAuthService(userRepository)
+	groupService        service.GroupService           = service.NewGroupService(groupRepository)
+	userGroupService    service.UserGroupService       = service.NewUserGroupService(userGroupRepository)
+	authController      controller.AuthController      = controller.NewAuthController(authService, jwtService)
+	userController      controller.UserController      = controller.NewUserController(userService, jwtService)
+	groupController     controller.GroupController     = controller.NewGroupController(groupService, jwtService, userGroupService)
 )
 
 func main() {
@@ -49,6 +54,16 @@ func main() {
 	{
 		userRoutes.GET("/profile", userController.Profile)
 		userRoutes.PUT("/profile", userController.Update)
+		userRoutes.GET("/:id", userController.FindByID)
+	}
+	groupRoutes := r.Group("api/group", middleware.AuthorizeJWT(jwtService))
+	{
+		groupRoutes.GET("/", groupController.AllGroup)
+		groupRoutes.GET("/:id", groupController.FindGroupByID)
+		groupRoutes.POST("/", groupController.CreateGroup)
+		groupRoutes.PUT("/:id", groupController.UpdateGroup)
+		groupRoutes.DELETE("/:id", groupController.DeleteGroup)
+		groupRoutes.GET("/:id/users", groupController.ListAllUsersInGroup)
 	}
 	r.Run(":" + port)
 }

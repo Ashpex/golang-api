@@ -19,12 +19,14 @@ type GroupController interface {
 	UpdateGroup(ctx *gin.Context)
 	DeleteGroup(ctx *gin.Context)
 	CreateGroup(ctx *gin.Context)
+	ListAllUsersInGroup(ctx *gin.Context)
 }
 
 type groupController struct {
 	groupService     service.GroupService
 	jwtService       service.JWTService
 	userGroupService service.UserGroupService
+	userService      service.UserService
 }
 
 func NewGroupController(groupService service.GroupService, jwtService service.JWTService, userGroupService service.UserGroupService) GroupController {
@@ -158,5 +160,22 @@ func (g *groupController) CreateGroup(ctx *gin.Context) {
 	group := g.groupService.CreateGroup(groupCreateDTO)
 	g.userGroupService.CreateGroup(userIDInt, group.ID)
 	res := helper.BuildResponse(true, "OK", group)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (g *groupController) ListAllUsersInGroup(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
+	if err != nil {
+		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	var userGroups []entity.UserGroup = g.userGroupService.FindByGroupID(id)
+	var users []entity.User
+	for _, item := range userGroups {
+		user := g.userService.FindByID(int64(item.UserID))
+		users = append(users, user)
+	}
+	res := helper.BuildResponse(true, "OK", users)
 	ctx.JSON(http.StatusOK, res)
 }

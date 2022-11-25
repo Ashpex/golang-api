@@ -18,6 +18,7 @@ type UserRepository interface {
 	FindByEmail(email string) entity.User
 	ProfileUser(userID string) entity.User
 	VerifyEmail(verificationCode string) (entity.User, error)
+	FindByID(userID int64) entity.User
 }
 
 type userConnection struct {
@@ -95,4 +96,13 @@ func (db *userConnection) VerifyEmail(verificationCode string) (entity.User, err
 	user.Verified = true
 	db.connection.Save(&user)
 	return user, err
+}
+
+func (db *userConnection) FindByID(userID int64) entity.User {
+	var user entity.User
+	res := db.connection.Where("id = ?", userID).Take(&user)
+	if res.Error != nil {
+		return user
+	}
+	return user
 }
