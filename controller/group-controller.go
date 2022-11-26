@@ -29,11 +29,12 @@ type groupController struct {
 	userService      service.UserService
 }
 
-func NewGroupController(groupService service.GroupService, jwtService service.JWTService, userGroupService service.UserGroupService) GroupController {
+func NewGroupController(groupService service.GroupService, jwtService service.JWTService, userGroupService service.UserGroupService, userService service.UserService) GroupController {
 	return &groupController{
 		groupService:     groupService,
 		jwtService:       jwtService,
 		userGroupService: userGroupService,
+		userService:      userService,
 	}
 }
 func (g *groupController) AllGroup(ctx *gin.Context) {
@@ -171,11 +172,13 @@ func (g *groupController) ListAllUsersInGroup(ctx *gin.Context) {
 		return
 	}
 	var userGroups []entity.UserGroup = g.userGroupService.FindByGroupID(id)
+	log.Println(userGroups)
 	var users []entity.User
 	for _, item := range userGroups {
-		user := g.userService.FindByID(int64(item.UserID))
+		log.Println(g.userService.FindByID(int64(item.User.ID)))
+		user := g.userService.FindByID(int64(item.User.ID))
 		users = append(users, user)
 	}
-	res := helper.BuildResponse(true, "OK", users)
+	res := helper.BuildResponse(true, "OK", userGroups)
 	ctx.JSON(http.StatusOK, res)
 }

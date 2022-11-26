@@ -100,7 +100,8 @@ func (db *userConnection) VerifyEmail(verificationCode string) (entity.User, err
 
 func (db *userConnection) FindByID(userID int64) entity.User {
 	var user entity.User
-	res := db.connection.Where("id = ?", userID).Take(&user)
+	res := db.connection.Preload("User_Groups").
+		Where("id = ?", userID).Take(&user)
 	if res.Error != nil {
 		return user
 	}

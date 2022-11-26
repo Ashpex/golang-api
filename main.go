@@ -25,7 +25,8 @@ var (
 	userGroupService    service.UserGroupService       = service.NewUserGroupService(userGroupRepository)
 	authController      controller.AuthController      = controller.NewAuthController(authService, jwtService)
 	userController      controller.UserController      = controller.NewUserController(userService, jwtService)
-	groupController     controller.GroupController     = controller.NewGroupController(groupService, jwtService, userGroupService)
+	groupController     controller.GroupController     = controller.NewGroupController(groupService, jwtService, userGroupService, userService)
+	//userGroupController controller.UserGroupController = controller.NewUserGroupController()
 )
 
 func main() {

@@ -12,3 +12,10 @@ type GroupCreateDTO struct {
 	Description string `json:"description" form:"description" binding:"required"`
 	UserID      uint64 `json:"user_id,omitempty" form:"user_id, omitempty"`
 }
+
+type GroupInfoDTO struct {
+	ID          uint64        `json:"id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Users       []UserInfoDTO `json:"users"`
+}

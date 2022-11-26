@@ -41,5 +41,6 @@ func (service *userService) Profile(userID string) entity.User {
 }
 
 func (service *userService) FindByID(userID int64) entity.User {
+	log.Println(service.userRepository.FindByID(userID))
 	return service.userRepository.FindByID(userID)
 }

@@ -12,6 +12,7 @@ type UserGroupRepository interface {
 	AllUserGroup() []entity.UserGroup
 	FindUserGroupByID(userID uint64, groupID uint64) entity.UserGroup
 	FindByGroupID(groupID uint64) []entity.UserGroup
+	FindByUserID(userID uint64) []entity.UserGroup
 }
 
 type userGroupConnection struct {
@@ -56,6 +57,12 @@ func (db *userGroupConnection) FindUserGroupByID(userID uint64, groupID uint64) 
 
 func (db *userGroupConnection) FindByGroupID(groupID uint64) []entity.UserGroup {
 	var userGroups []entity.UserGroup
-	db.connection.Preload("Users").Find(&userGroups, groupID)
+	db.connection.Preload("Users").Preload("Groups").Where("group_id = ?", groupID).Find(&userGroups)
+	return userGroups
+}
+
+func (db *userGroupConnection) FindByUserID(userID uint64) []entity.UserGroup {
+	var userGroups []entity.UserGroup
+	db.connection.Preload("Users").Preload("Groups").Where("user_id = ?", userID).Find(&userGroups)
 	return userGroups
 }
