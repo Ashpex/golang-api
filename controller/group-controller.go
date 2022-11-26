@@ -193,12 +193,11 @@ func (g *groupController) ListAllUsersInGroup(ctx *gin.Context) {
 		return
 	}
 	var userGroups []entity.UserGroup = g.userGroupService.FindByGroupID(id)
-	log.Println(userGroups)
 	var users []entity.User
 	for _, item := range userGroups {
-		user := g.userService.FindByID(int64(item.User.ID))
+		user := g.userService.FindByID(int64(item.UserID))
 		users = append(users, user)
 	}
-	res := helper.BuildResponse(true, "OK", userGroups)
+	res := helper.BuildResponse(true, "OK", users)
 	ctx.JSON(http.StatusOK, res)
 }
