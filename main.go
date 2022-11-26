@@ -65,6 +65,7 @@ func main() {
 		groupRoutes.PUT("/:id", groupController.UpdateGroup)
 		groupRoutes.DELETE("/:id", groupController.DeleteGroup)
 		groupRoutes.GET("/:id/users", groupController.ListAllUsersInGroup)
+		groupRoutes.GET("/:id/created/", groupController.ListGroupsCreatedByUser)
 	}
 	r.Run(":" + port)
 }

@@ -28,7 +28,6 @@ func NewUserGroupController(groupService service.GroupService, jwtService servic
 		userGroupService: userGroupService,
 	}
 }
-
 func (g *userGroupController) ListAllUserInGroup(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
 	if err != nil {

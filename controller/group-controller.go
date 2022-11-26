@@ -20,6 +20,7 @@ type GroupController interface {
 	DeleteGroup(ctx *gin.Context)
 	CreateGroup(ctx *gin.Context)
 	ListAllUsersInGroup(ctx *gin.Context)
+	ListGroupsCreatedByUser(ctx *gin.Context)
 }
 
 type groupController struct {
@@ -27,6 +28,26 @@ type groupController struct {
 	jwtService       service.JWTService
 	userGroupService service.UserGroupService
 	userService      service.UserService
+}
+
+func (g *groupController) ListGroupsCreatedByUser(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
+	if err != nil {
+		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	var userGroups []entity.UserGroup = g.userGroupService.FindByGroupID(id)
+	var groups []entity.Group
+	for _, item := range userGroups {
+		if item.Role == "admin" {
+			group := g.groupService.FindByID(item.GroupID)
+			log.Println(group)
+			groups = append(groups, group)
+		}
+	}
+	res := helper.BuildResponse(true, "OK", groups)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func NewGroupController(groupService service.GroupService, jwtService service.JWTService, userGroupService service.UserGroupService, userService service.UserService) GroupController {
@@ -175,7 +196,6 @@ func (g *groupController) ListAllUsersInGroup(ctx *gin.Context) {
 	log.Println(userGroups)
 	var users []entity.User
 	for _, item := range userGroups {
-		log.Println(g.userService.FindByID(int64(item.User.ID)))
 		user := g.userService.FindByID(int64(item.User.ID))
 		users = append(users, user)
 	}
