@@ -198,6 +198,15 @@ func (g *groupController) ListAllUsersInGroup(ctx *gin.Context) {
 		user := g.userService.FindByID(int64(item.UserID))
 		users = append(users, user)
 	}
-	res := helper.BuildResponse(true, "OK", users)
+	var userDTOs []dto.UserInfoDTO
+	for i := 0; i < len(users); i++ {
+		userDTO := dto.UserInfoDTO{
+			ID:   users[i].ID,
+			Name: users[i].Name,
+			Role: userGroups[i].Role,
+		}
+		userDTOs = append(userDTOs, userDTO)
+	}
+	res := helper.BuildResponse(true, "OK", userDTOs)
 	ctx.JSON(http.StatusOK, res)
 }
