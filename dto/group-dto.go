@@ -19,3 +19,9 @@ type GroupInfoDTO struct {
 	Description string        `json:"description"`
 	Users       []UserInfoDTO `json:"users"`
 }
+
+type AssignRoleDTO struct {
+	UserID  uint64 `json:"user_id" form:"user_id" binding:"required"`
+	GroupID uint64 `json:"group_id" form:"group_id" binding:"required"`
+	Role    string `json:"role" form:"role" binding:"required"`
+}

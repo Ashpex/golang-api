@@ -3,6 +3,7 @@ package service
 import (
 	"golang-api/entity"
 	"golang-api/repository"
+	"log"
 )
 
 type UserGroupService interface {
@@ -12,6 +13,7 @@ type UserGroupService interface {
 	FindUserGroupByID(userID uint64, groupID uint64) entity.UserGroup
 	FindByGroupID(groupID uint64) []entity.UserGroup
 	FindByUserID(userID uint64) []entity.UserGroup
+	AssignRole(userID uint64, groupID uint64, role string) entity.UserGroup
 }
 
 func NewUserGroupService(userGroupRepo repository.UserGroupRepository) UserGroupService {
@@ -22,6 +24,13 @@ func NewUserGroupService(userGroupRepo repository.UserGroupRepository) UserGroup
 
 type userGroupService struct {
 	userGroupRepository repository.UserGroupRepository
+}
+
+func (service *userGroupService) AssignRole(userID uint64, groupID uint64, role string) entity.UserGroup {
+	userGroup := service.userGroupRepository.FindUserGroupByID(userID, groupID)
+	userGroup.Role = role
+	log.Println(userGroup)
+	return service.userGroupRepository.UpdateUserGroup(userGroup)
 }
 
 func (service *userGroupService) CreateGroup(userID uint64, groupID uint64) entity.UserGroup {

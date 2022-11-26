@@ -21,6 +21,8 @@ type GroupController interface {
 	CreateGroup(ctx *gin.Context)
 	ListAllUsersInGroup(ctx *gin.Context)
 	ListGroupsCreatedByUser(ctx *gin.Context)
+	ListGroupsJoinedByUser(ctx *gin.Context)
+	AssignRole(ctx *gin.Context)
 }
 
 type groupController struct {
@@ -28,26 +30,6 @@ type groupController struct {
 	jwtService       service.JWTService
 	userGroupService service.UserGroupService
 	userService      service.UserService
-}
-
-func (g *groupController) ListGroupsCreatedByUser(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
-	if err != nil {
-		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-	var userGroups []entity.UserGroup = g.userGroupService.FindByGroupID(id)
-	var groups []entity.Group
-	for _, item := range userGroups {
-		if item.Role == "admin" {
-			group := g.groupService.FindByID(item.GroupID)
-			log.Println(group)
-			groups = append(groups, group)
-		}
-	}
-	res := helper.BuildResponse(true, "OK", groups)
-	ctx.JSON(http.StatusOK, res)
 }
 
 func NewGroupController(groupService service.GroupService, jwtService service.JWTService, userGroupService service.UserGroupService, userService service.UserService) GroupController {
@@ -208,5 +190,82 @@ func (g *groupController) ListAllUsersInGroup(ctx *gin.Context) {
 		userDTOs = append(userDTOs, userDTO)
 	}
 	res := helper.BuildResponse(true, "OK", userDTOs)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (g *groupController) ListGroupsJoinedByUser(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
+	if err != nil {
+		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	var userGroups []entity.UserGroup = g.userGroupService.FindByUserID(id)
+	var groups []entity.Group
+	for _, item := range userGroups {
+		group := g.groupService.FindByID(item.GroupID)
+		groups = append(groups, group)
+	}
+	res := helper.BuildResponse(true, "OK", groups)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (g *groupController) ListGroupsCreatedByUser(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
+	if err != nil {
+		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	var userGroups []entity.UserGroup = g.userGroupService.FindByGroupID(id)
+	var groups []entity.Group
+	for _, item := range userGroups {
+		if item.Role == "admin" {
+			group := g.groupService.FindByID(item.GroupID)
+			log.Println(group)
+			groups = append(groups, group)
+		}
+	}
+	res := helper.BuildResponse(true, "OK", groups)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (g *groupController) AssignRole(ctx *gin.Context) {
+	var assignRoleDTO dto.AssignRoleDTO
+	errDTO := ctx.ShouldBind(&assignRoleDTO)
+	if errDTO != nil {
+		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	authHeader := ctx.GetHeader("Authorization")
+	token, errToken := g.jwtService.ValidateToken(authHeader)
+	if errToken != nil {
+		panic(errToken.Error())
+	}
+	claims := token.Claims.(jwt.MapClaims)
+	userID := fmt.Sprintf("%v", claims["user_id"])
+	userIDInt, err := strconv.ParseUint(userID, 0, 0)
+	if err != nil {
+		log.Print(err)
+	}
+	log.Println(userIDInt)
+	admin := g.userGroupService.FindUserGroupByID(userIDInt, assignRoleDTO.GroupID)
+	log.Println("admin: ", admin)
+	userGroup := g.userGroupService.FindUserGroupByID(assignRoleDTO.UserID, assignRoleDTO.GroupID)
+	log.Println("userGroup: ", userGroup)
+	if (admin == entity.UserGroup{}) || (userGroup == entity.UserGroup{}) {
+		res := helper.BuildErrorResponse("Failed to process request", "You are not in this group", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
+		return
+	}
+	if admin.Role != "admin" {
+		res := helper.BuildErrorResponse("Failed to process request", "You are not admin in this group", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
+		return
+	}
+	log.Print("assignRoleDTO: ", assignRoleDTO)
+	userGroup = g.userGroupService.AssignRole(assignRoleDTO.UserID, assignRoleDTO.GroupID, assignRoleDTO.Role)
+	res := helper.BuildResponse(true, "OK", helper.EmptyObj{})
 	ctx.JSON(http.StatusOK, res)
 }
