@@ -23,21 +23,25 @@ type GroupController interface {
 	ListGroupsCreatedByUser(ctx *gin.Context)
 	ListGroupsJoinedByUser(ctx *gin.Context)
 	AssignRole(ctx *gin.Context)
+	GenerateInvitation(ctx *gin.Context)
+	JoinGroupByInvitation(ctx *gin.Context)
 }
 
 type groupController struct {
-	groupService     service.GroupService
-	jwtService       service.JWTService
-	userGroupService service.UserGroupService
-	userService      service.UserService
+	groupService      service.GroupService
+	jwtService        service.JWTService
+	userGroupService  service.UserGroupService
+	userService       service.UserService
+	invitationService service.InvitationService
 }
 
-func NewGroupController(groupService service.GroupService, jwtService service.JWTService, userGroupService service.UserGroupService, userService service.UserService) GroupController {
+func NewGroupController(groupService service.GroupService, jwtService service.JWTService, userGroupService service.UserGroupService, userService service.UserService, invitationService service.InvitationService) GroupController {
 	return &groupController{
-		groupService:     groupService,
-		jwtService:       jwtService,
-		userGroupService: userGroupService,
-		userService:      userService,
+		groupService:      groupService,
+		jwtService:        jwtService,
+		userGroupService:  userGroupService,
+		userService:       userService,
+		invitationService: invitationService,
 	}
 }
 func (g *groupController) AllGroup(ctx *gin.Context) {
@@ -248,11 +252,8 @@ func (g *groupController) AssignRole(ctx *gin.Context) {
 	if err != nil {
 		log.Print(err)
 	}
-	log.Println(userIDInt, assignRoleDTO.UserID, assignRoleDTO.GroupID)
 	admin := g.userGroupService.FindUserGroupByID(userIDInt, assignRoleDTO.GroupID)
 	userGroup := g.userGroupService.FindUserGroupByID(assignRoleDTO.UserID, assignRoleDTO.GroupID)
-	log.Println("admin", admin)
-	log.Println("userGroup", userGroup)
 	if (admin == entity.UserGroup{} || admin.Role != "admin") {
 		res := helper.BuildErrorResponse("Failed to process request", "You are not admin in this group", helper.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
@@ -265,5 +266,66 @@ func (g *groupController) AssignRole(ctx *gin.Context) {
 	}
 	userGroup = g.userGroupService.AssignRole(assignRoleDTO.UserID, assignRoleDTO.GroupID, assignRoleDTO.Role)
 	res := helper.BuildResponse(true, "OK", helper.EmptyObj{})
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (g *groupController) GenerateInvitation(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 0)
+	if err != nil {
+		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	authHeader := ctx.GetHeader("Authorization")
+	token, errToken := g.jwtService.ValidateToken(authHeader)
+	if errToken != nil {
+		panic(errToken.Error())
+	}
+	claims := token.Claims.(jwt.MapClaims)
+	userID := fmt.Sprintf("%v", claims["user_id"])
+	userIDInt, err := strconv.ParseUint(userID, 0, 0)
+	if err != nil {
+		log.Print(err)
+	}
+	admin := g.userGroupService.FindUserGroupByID(userIDInt, id)
+	if (admin == entity.UserGroup{} || admin.Role != "admin") {
+		res := helper.BuildErrorResponse("Failed to process request", "You are not admin in this group", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
+		return
+	}
+	invitation := g.invitationService.GenerateInvitation(id)
+	res := helper.BuildResponse(true, "OK", invitation.InvitationCode)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (g *groupController) JoinGroupByInvitation(ctx *gin.Context) {
+	invitationCode := ctx.Params.ByName("invitation_code")
+	authHeader := ctx.GetHeader("Authorization")
+	token, errToken := g.jwtService.ValidateToken(authHeader)
+	if errToken != nil {
+		panic(errToken.Error())
+	}
+	claims := token.Claims.(jwt.MapClaims)
+	userID := fmt.Sprintf("%v", claims["user_id"])
+	userIDInt, err := strconv.ParseUint(userID, 0, 0)
+	if err != nil {
+		log.Print(err)
+	}
+	invitation := g.invitationService.FindByInvitationCode(invitationCode)
+	if (invitation == entity.Invitation{}) {
+		res := helper.BuildErrorResponse("Failed to process request", "Invitation code is invalid", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
+		return
+	}
+	userGroup := g.userGroupService.FindUserGroupByID(userIDInt, invitation.GroupID)
+	if (userGroup != entity.UserGroup{}) {
+		res := helper.BuildErrorResponse("Failed to process request", "You are already in this group", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
+		return
+	}
+	userGroup = g.userGroupService.JoinGroup(userIDInt, invitation.GroupID)
+	groupInfo := g.groupService.FindByID(invitation.GroupID)
+	g.invitationService.DeleteInvitation(invitation)
+	res := helper.BuildResponse(true, "Joined group", groupInfo)
 	ctx.JSON(http.StatusOK, res)
 }

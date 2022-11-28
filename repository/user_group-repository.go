@@ -27,8 +27,7 @@ func NewUserGroupRepository(dbConnection *gorm.DB) UserGroupRepository {
 
 func (db *userGroupConnection) CreateUserGroup(g entity.UserGroup) entity.UserGroup {
 	db.connection.Save(&g)
-	db.connection.Preload("Users").Find(&g)
-	db.connection.Preload("Groups").Find(&g)
+	db.connection.Preload("User-Groups").Find(&g)
 	return g
 }
 

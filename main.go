@@ -14,18 +14,20 @@ import (
 )
 
 var (
-	db                  *gorm.DB                       = config.SetupDatabaseConnection()
-	userRepository      repository.UserRepository      = repository.NewUserRepository(db)
-	groupRepository     repository.GroupRepository     = repository.NewGroupRepository(db)
-	userGroupRepository repository.UserGroupRepository = repository.NewUserGroupRepository(db)
-	jwtService          service.JWTService             = service.NewJWTService()
-	userService         service.UserService            = service.NewUserService(userRepository)
-	authService         service.AuthService            = service.NewAuthService(userRepository)
-	groupService        service.GroupService           = service.NewGroupService(groupRepository)
-	userGroupService    service.UserGroupService       = service.NewUserGroupService(userGroupRepository)
-	authController      controller.AuthController      = controller.NewAuthController(authService, jwtService)
-	userController      controller.UserController      = controller.NewUserController(userService, jwtService)
-	groupController     controller.GroupController     = controller.NewGroupController(groupService, jwtService, userGroupService, userService)
+	db                   *gorm.DB                        = config.SetupDatabaseConnection()
+	userRepository       repository.UserRepository       = repository.NewUserRepository(db)
+	groupRepository      repository.GroupRepository      = repository.NewGroupRepository(db)
+	userGroupRepository  repository.UserGroupRepository  = repository.NewUserGroupRepository(db)
+	invitationRepository repository.InvitationRepository = repository.NewInvitationRepository(db)
+	jwtService           service.JWTService              = service.NewJWTService()
+	userService          service.UserService             = service.NewUserService(userRepository)
+	authService          service.AuthService             = service.NewAuthService(userRepository)
+	groupService         service.GroupService            = service.NewGroupService(groupRepository)
+	userGroupService     service.UserGroupService        = service.NewUserGroupService(userGroupRepository)
+	invitationService    service.InvitationService       = service.NewInvitationService(invitationRepository)
+	authController       controller.AuthController       = controller.NewAuthController(authService, jwtService)
+	userController       controller.UserController       = controller.NewUserController(userService, jwtService)
+	groupController      controller.GroupController      = controller.NewGroupController(groupService, jwtService, userGroupService, userService, invitationService)
 	//userGroupController controller.UserGroupController = controller.NewUserGroupController()
 )
 
@@ -68,7 +70,8 @@ func main() {
 		groupRoutes.GET("/:id/created/", groupController.ListGroupsCreatedByUser)
 		groupRoutes.GET("/:id/joined/", groupController.ListGroupsJoinedByUser)
 		groupRoutes.PUT("/assign/", groupController.AssignRole)
-
+		groupRoutes.GET("/:id/generate-invitation", groupController.GenerateInvitation)
+		groupRoutes.GET("/join/:invitation_code", groupController.JoinGroupByInvitation)
 	}
 	r.Run(":" + port)
 }
