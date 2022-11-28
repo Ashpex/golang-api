@@ -222,7 +222,6 @@ func (g *groupController) ListGroupsCreatedByUser(ctx *gin.Context) {
 	for _, item := range userGroups {
 		if item.Role == "admin" {
 			group := g.groupService.FindByID(item.GroupID)
-			log.Println(group)
 			groups = append(groups, group)
 		}
 	}
@@ -249,22 +248,21 @@ func (g *groupController) AssignRole(ctx *gin.Context) {
 	if err != nil {
 		log.Print(err)
 	}
-	log.Println(userIDInt)
+	log.Println(userIDInt, assignRoleDTO.UserID, assignRoleDTO.GroupID)
 	admin := g.userGroupService.FindUserGroupByID(userIDInt, assignRoleDTO.GroupID)
-	log.Println("admin: ", admin)
 	userGroup := g.userGroupService.FindUserGroupByID(assignRoleDTO.UserID, assignRoleDTO.GroupID)
-	log.Println("userGroup: ", userGroup)
-	if (admin == entity.UserGroup{}) || (userGroup == entity.UserGroup{}) {
-		res := helper.BuildErrorResponse("Failed to process request", "You are not in this group", helper.EmptyObj{})
-		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
-		return
-	}
-	if admin.Role != "admin" {
+	log.Println("admin", admin)
+	log.Println("userGroup", userGroup)
+	if (admin == entity.UserGroup{} || admin.Role != "admin") {
 		res := helper.BuildErrorResponse("Failed to process request", "You are not admin in this group", helper.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
 		return
 	}
-	log.Print("assignRoleDTO: ", assignRoleDTO)
+	if (userGroup == entity.UserGroup{}) {
+		res := helper.BuildErrorResponse("Failed to process request", "User is not in this group", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
+		return
+	}
 	userGroup = g.userGroupService.AssignRole(assignRoleDTO.UserID, assignRoleDTO.GroupID, assignRoleDTO.Role)
 	res := helper.BuildResponse(true, "OK", helper.EmptyObj{})
 	ctx.JSON(http.StatusOK, res)

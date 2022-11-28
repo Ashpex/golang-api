@@ -51,7 +51,7 @@ func (db *userGroupConnection) AllUserGroup() []entity.UserGroup {
 
 func (db *userGroupConnection) FindUserGroupByID(userID uint64, groupID uint64) entity.UserGroup {
 	var userGroup entity.UserGroup
-	db.connection.Preload("Users").Find(&userGroup, userID, groupID)
+	db.connection.Preload("Users").Preload("Groups").Where("user_id = ? AND group_id = ?", userID, groupID).Find(&userGroup)
 	return userGroup
 }
 
