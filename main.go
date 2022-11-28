@@ -72,6 +72,7 @@ func main() {
 		groupRoutes.PUT("/assign/", groupController.AssignRole)
 		groupRoutes.GET("/:id/generate-invitation", groupController.GenerateInvitation)
 		groupRoutes.GET("/join/:invitation_code", groupController.JoinGroupByInvitation)
+		groupRoutes.POST("/create-invitation", groupController.CreateEmailInvitation)
 	}
 	r.Run(":" + port)
 }

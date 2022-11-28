@@ -25,6 +25,7 @@ type GroupController interface {
 	AssignRole(ctx *gin.Context)
 	GenerateInvitation(ctx *gin.Context)
 	JoinGroupByInvitation(ctx *gin.Context)
+	CreateEmailInvitation(ctx *gin.Context)
 }
 
 type groupController struct {
@@ -327,5 +328,39 @@ func (g *groupController) JoinGroupByInvitation(ctx *gin.Context) {
 	groupInfo := g.groupService.FindByID(invitation.GroupID)
 	g.invitationService.DeleteInvitation(invitation)
 	res := helper.BuildResponse(true, "Joined group", groupInfo)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (g *groupController) CreateEmailInvitation(ctx *gin.Context) {
+	var emailInvitationDTO dto.InvitationCreateDTO
+	errDTO := ctx.ShouldBind(&emailInvitationDTO)
+	if errDTO != nil {
+		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	authHeader := ctx.GetHeader("Authorization")
+	token, errToken := g.jwtService.ValidateToken(authHeader)
+	if errToken != nil {
+		panic(errToken.Error())
+	}
+	claims := token.Claims.(jwt.MapClaims)
+	userID := fmt.Sprintf("%v", claims["user_id"])
+	userIDInt, err := strconv.ParseUint(userID, 0, 0)
+	if err != nil {
+		log.Print(err)
+	}
+	admin := g.userGroupService.FindUserGroupByID(userIDInt, emailInvitationDTO.GroupID)
+	if (admin == entity.UserGroup{} || admin.Role != "admin") {
+		res := helper.BuildErrorResponse("Failed to process request", "You are not admin in this group", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
+		return
+	}
+	invitation := entity.Invitation{
+		GroupID: emailInvitationDTO.GroupID,
+		Email:   emailInvitationDTO.Email,
+	}
+	invitationEmail := g.invitationService.CreateEmailInvitation(invitation)
+	res := helper.BuildResponse(true, "OK", invitationEmail)
 	ctx.JSON(http.StatusOK, res)
 }

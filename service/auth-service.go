@@ -56,7 +56,7 @@ func (service *authService) CreateUser(user dto.RegisterDTO) entity.User {
 		Subject:   "Your account verification code",
 		Code:      verificationCode,
 	}
-	helper.SendEmail(&userToCreate, &emailData)
+	helper.SendVerifyEmail(&userToCreate, &emailData)
 	if err != nil {
 		log.Fatalf("Failed map %v", err)
 	}

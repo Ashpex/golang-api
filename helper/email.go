@@ -43,7 +43,7 @@ func ParseTemplateDir(dir string) (*template.Template, error) {
 	return template.ParseFiles(paths...)
 }
 
-func SendEmail(user *entity.User, data *EmailData) {
+func SendVerifyEmail(user *entity.User, data *EmailData) {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -59,6 +59,55 @@ func SendEmail(user *entity.User, data *EmailData) {
 	smtpPass := env.SMTP_PASS
 	smtpUser := env.SMTP_USER
 	to := user.Email
+	smtpHost := env.SMTP_HOST
+	smtpPort, err := strconv.Atoi(env.SMTP_PORT)
+	if err != nil {
+		log.Fatal("failed to parse port integer", err)
+	}
+
+	var body bytes.Buffer
+
+	template, err := ParseTemplateDir("templates")
+	if err != nil {
+		log.Fatal("Could not parse template", err)
+	}
+
+	template.ExecuteTemplate(&body, "verificationCode.html", &data)
+
+	m := gomail.NewMessage()
+
+	m.SetHeader("From", from)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", data.Subject)
+	m.SetBody("text/html", body.String())
+	m.AddAlternative("text/plain", html2text.HTML2Text(body.String()))
+
+	d := gomail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+	// Send Email
+	if err := d.DialAndSend(m); err != nil {
+		log.Fatal("Could not send email: ", err)
+	}
+
+}
+
+func SendInvitationEmail(invitation *entity.Invitation, data *EmailData) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	if err != nil {
+		log.Fatal("could not load config", err)
+	}
+
+	// Sender data.
+	env := config.LoadEnv()
+	from := env.EMAIL_FROM
+	smtpPass := env.SMTP_PASS
+	smtpUser := env.SMTP_USER
+	to := invitation.Email
 	smtpHost := env.SMTP_HOST
 	smtpPort, err := strconv.Atoi(env.SMTP_PORT)
 	if err != nil {
