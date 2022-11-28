@@ -37,7 +37,7 @@ func (service *invitationService) CreateEmailInvitation(invitation entity.Invita
 	}
 	env := config.LoadEnv()
 	emailData := helper.EmailData{
-		URL:     env.CLIENT_URL + "/api/join/" + invitationCode,
+		URL:     env.CLIENT_URL + "/api/group/join/" + invitationCode,
 		Subject: "You have been invited to join a group",
 		Code:    invitationCode,
 	}

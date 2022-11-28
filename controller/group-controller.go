@@ -360,7 +360,14 @@ func (g *groupController) CreateEmailInvitation(ctx *gin.Context) {
 		GroupID: emailInvitationDTO.GroupID,
 		Email:   emailInvitationDTO.Email,
 	}
+	userToSend := g.userService.FindByEmail(emailInvitationDTO.Email)
+	groupToInvite := g.groupService.FindByID(emailInvitationDTO.GroupID)
 	invitationEmail := g.invitationService.CreateEmailInvitation(invitation)
-	res := helper.BuildResponse(true, "OK", invitationEmail)
+	res := helper.BuildResponse(true, "OK", &entity.Invitation{
+		Email:          invitationEmail.Email,
+		InvitationCode: invitationEmail.InvitationCode,
+		User:           userToSend,
+		Group:          groupToInvite,
+	})
 	ctx.JSON(http.StatusOK, res)
 }

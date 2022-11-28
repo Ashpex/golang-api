@@ -13,6 +13,7 @@ type UserService interface {
 	Update(user dto.UserUpdateDTO) entity.User
 	Profile(userID string) entity.User
 	FindByID(userID int64) entity.User
+	FindByEmail(email string) entity.User
 }
 
 type userService struct {
@@ -41,6 +42,9 @@ func (service *userService) Profile(userID string) entity.User {
 }
 
 func (service *userService) FindByID(userID int64) entity.User {
-	log.Println(service.userRepository.FindByID(userID))
 	return service.userRepository.FindByID(userID)
+}
+
+func (service *userService) FindByEmail(email string) entity.User {
+	return service.userRepository.FindByEmail(email)
 }

@@ -121,7 +121,7 @@ func SendInvitationEmail(invitation *entity.Invitation, data *EmailData) {
 		log.Fatal("Could not parse template", err)
 	}
 
-	template.ExecuteTemplate(&body, "verificationCode.html", &data)
+	template.ExecuteTemplate(&body, "invitationCode.html", &data)
 
 	m := gomail.NewMessage()
 
