@@ -46,6 +46,6 @@ func (db *groupConnection) AllGroup() []entity.Group {
 
 func (db *groupConnection) FindGroupByID(groupID uint64) entity.Group {
 	var group entity.Group
-	db.connection.Preload("Users").Find(&group, groupID)
+	db.connection.Find(&group, groupID)
 	return group
 }

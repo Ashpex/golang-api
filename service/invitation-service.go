@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/thanhpk/randstr"
 	"golang-api/config"
-	"golang-api/dto"
 	"golang-api/entity"
 	"golang-api/helper"
 	"golang-api/repository"
@@ -12,7 +11,7 @@ import (
 
 type InvitationService interface {
 	GenerateInvitation(groupID uint64) entity.Invitation
-	CreateInvitation(i dto.InvitationCreateDTO) entity.Invitation
+	CreateInvitation(i entity.Invitation) entity.Invitation
 	DeleteInvitation(i entity.Invitation) entity.Invitation
 	FindByInvitationCode(invitationCode string) entity.Invitation
 	CreateEmailInvitation(i entity.Invitation) entity.Invitation
@@ -31,13 +30,14 @@ type invitationService struct {
 func (service *invitationService) CreateEmailInvitation(invitation entity.Invitation) entity.Invitation {
 	invitationCode := randstr.String(20)
 	invitationToCreate := entity.Invitation{
+		UserID:         invitation.UserID,
 		GroupID:        invitation.GroupID,
 		Email:          invitation.Email,
 		InvitationCode: invitationCode,
 	}
 	env := config.LoadEnv()
 	emailData := helper.EmailData{
-		URL:     env.CLIENT_URL + "/api/group/join/" + invitationCode,
+		URL:     env.CLIENT_URL + "/api/join-group/email/" + invitationCode,
 		Subject: "You have been invited to join a group",
 		Code:    invitationCode,
 	}
@@ -54,7 +54,7 @@ func (service *invitationService) GenerateInvitation(groupID uint64) entity.Invi
 	return service.invitationRepository.CreateInvitation(invitationToCreate)
 }
 
-func (service *invitationService) CreateInvitation(i dto.InvitationCreateDTO) entity.Invitation {
+func (service *invitationService) CreateInvitation(i entity.Invitation) entity.Invitation {
 	invitationToCreate := entity.Invitation{
 		GroupID:        i.GroupID,
 		Email:          i.Email,

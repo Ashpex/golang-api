@@ -25,6 +25,7 @@ type GroupController interface {
 	AssignRole(ctx *gin.Context)
 	GenerateInvitation(ctx *gin.Context)
 	JoinGroupByInvitation(ctx *gin.Context)
+	JoinGroupByEmail(ctx *gin.Context)
 	CreateEmailInvitation(ctx *gin.Context)
 }
 
@@ -356,12 +357,14 @@ func (g *groupController) CreateEmailInvitation(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
 		return
 	}
+
+	userToSend := g.userService.FindByEmail(emailInvitationDTO.Email)
+	groupToInvite := g.groupService.FindByID(emailInvitationDTO.GroupID)
 	invitation := entity.Invitation{
+		UserID:  userToSend.ID,
 		GroupID: emailInvitationDTO.GroupID,
 		Email:   emailInvitationDTO.Email,
 	}
-	userToSend := g.userService.FindByEmail(emailInvitationDTO.Email)
-	groupToInvite := g.groupService.FindByID(emailInvitationDTO.GroupID)
 	invitationEmail := g.invitationService.CreateEmailInvitation(invitation)
 	res := helper.BuildResponse(true, "OK", &entity.Invitation{
 		Email:          invitationEmail.Email,
@@ -369,5 +372,26 @@ func (g *groupController) CreateEmailInvitation(ctx *gin.Context) {
 		User:           userToSend,
 		Group:          groupToInvite,
 	})
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (g *groupController) JoinGroupByEmail(ctx *gin.Context) {
+	invitationCode := ctx.Params.ByName("invitation_code")
+	invitationInfo := g.invitationService.FindByInvitationCode(invitationCode)
+	if (invitationInfo == entity.Invitation{}) {
+		res := helper.BuildErrorResponse("Failed to process request", "Invitation code is invalid", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
+		return
+	}
+	userGroup := g.userGroupService.FindUserGroupByID(invitationInfo.UserID, invitationInfo.GroupID)
+	if (userGroup != entity.UserGroup{}) {
+		res := helper.BuildErrorResponse("Failed to process request", "You are already in this group", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusForbidden, res)
+		return
+	}
+	userGroup = g.userGroupService.JoinGroup(invitationInfo.UserID, invitationInfo.GroupID)
+	groupInfo := g.groupService.FindByID(invitationInfo.GroupID)
+	g.invitationService.DeleteInvitation(invitationInfo)
+	res := helper.BuildResponse(true, "Joined group", groupInfo)
 	ctx.JSON(http.StatusOK, res)
 }

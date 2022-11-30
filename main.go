@@ -74,5 +74,9 @@ func main() {
 		groupRoutes.GET("/join/:invitation_code", groupController.JoinGroupByInvitation)
 		groupRoutes.POST("/create-invitation", groupController.CreateEmailInvitation)
 	}
+	joinGroupRoutes := r.Group("api/join-group")
+	{
+		joinGroupRoutes.GET("/email/:invitation_code", groupController.JoinGroupByEmail)
+	}
 	r.Run(":" + port)
 }
