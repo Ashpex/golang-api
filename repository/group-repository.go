@@ -24,13 +24,13 @@ func NewGroupRepository(dbConnection *gorm.DB) GroupRepository {
 }
 func (db *groupConnection) CreateGroup(g entity.Group) entity.Group {
 	db.connection.Save(&g)
-	db.connection.Preload("Users").Find(&g)
+	db.connection.Find(&g)
 	return g
 }
 
 func (db *groupConnection) UpdateGroup(g entity.Group) entity.Group {
 	db.connection.Save(&g)
-	db.connection.Preload("Users").Find(&g)
+	db.connection.Find(&g)
 	return g
 }
 
