@@ -1,0 +1,125 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('ex-week04:server');
+var http = require('http');
+const classService = require("../api/classes/classService");
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '4000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_HOST,
+    methods: ["GET", "POST"]
+  },
+  allowEIO3: true
+});
+
+io.on('connection', (socket) => {
+  console.log(socket.id);
+  socket.on("join_room", (data) => {
+    console.log("join room", data);
+    socket.join(data);
+  })
+  socket.on("send_comment", (data) => {
+    console.log(data);
+    socket.to(data.review_id).emit("receive_comment_" + data.review_id, data);
+    classService.sendComment(data);
+  })
+  socket.on("send_notification", (data) => {
+    console.log(data);
+    socket.to("class_" + data.class_id).emit("receive_notification_" + data.class_id + "_" + data.to_role_name, data);
+    classService.addNotificationPublic(data);
+  })
+  socket.on("send_notification_private", (data) => {
+    console.log(data);
+    socket.to("class_private_" + data.to_user).emit("receive_notification_private_" + data.to_user, data);
+    classService.addNotificationPrivate(data);
+  })
+  socket.on("disconnect", () => {
+    console.log("User disconnect");
+  })
+});
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
