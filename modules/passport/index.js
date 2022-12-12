@@ -142,9 +142,11 @@ passport.use(
   new GoogleStrategy(
     {
       clientID:
+        process.env.GOOGLE_CLIENT_ID ||
         "780592097647-hif1svldddrkc4jpojqc44paile3l8da.apps.googleusercontent.com",
-      clientSecret: "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",
-      callbackURL: "http://localhost:3000",
+      clientSecret:
+        process.env.GOOGLE_SECRET || "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",
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000",
     },
     function (token, tokenSecret, profile, done) {
       console.log(token);

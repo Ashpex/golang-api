@@ -4,7 +4,7 @@ const passport = require("../../modules/passport");
 const jwt = require("jsonwebtoken");
 const pool = require("../../config-db");
 const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(process.env.CLIENT_ID_GOOGLE);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const authModel = require("./authModel");
 const authController = require("./authController");
 
@@ -25,7 +25,7 @@ router.post("/google", async function (req, res) {
   try {
     const ticket = await client.verifyIdToken({
       idToken: req.body.token,
-      audience: process.env.CLIENT_ID_GOOGLE,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
     const user = {
