@@ -7,7 +7,6 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 exports.create = async (req, res) => {
   const isExist = await registerService.getUserByEmail(req.body.email);
-  console.log("isExist", isExist);
   if (isExist) {
     res.status(405).json({ message: "This account has already existed" });
   }
@@ -26,14 +25,18 @@ exports.create = async (req, res) => {
         first_name: req.body.first_name,
         last_name: req.body.last_name,
         email: req.body.email,
-      }
-      const token = jwt.sign(userVerified, process.env.ACCESS_TOKEN_SECRET_KEY, {
-        expiresIn: "12h",
-      });
+      };
+      const token = jwt.sign(
+        userVerified,
+        process.env.ACCESS_TOKEN_SECRET_KEY,
+        {
+          expiresIn: "12h",
+        }
+      );
       const msg = {
         to: req.body.email,
         from: {
-          email: "phucyugi@gmail.com",
+          email: "truongquocvuong1902@gmail.com",
           name: "Classroom SPA",
         },
         template_id: process.env.TEMPLATE_VERIFIED,

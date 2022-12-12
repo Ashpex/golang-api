@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const passport = require("../../modules/passport");
 const jwt = require("jsonwebtoken");
-const pool = require("../../config-db");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const authModel = require("./authModel");
@@ -35,10 +34,6 @@ router.post("/google", async function (req, res) {
       avatar: payload["picture"],
       email: payload["email"],
     };
-    // const isExist = await authModel.checkExistUserThirdParty(payload["sub"]);
-    // if (!isExist) {
-    //   const isSucess = await authModel.createThirdPartyUser(user);
-    // }
     const isExist = await authModel.checkExistUserGoogle(payload["email"]);
     let isSuccess = {};
     if (isExist && isExist.provider_id_gg === null) {
@@ -63,60 +58,6 @@ router.post("/google", async function (req, res) {
   } catch (error) {
     console.log(error);
   }
-});
-
-router.post("/facebook", async function (req, res, next) {
-  await passport.authenticate(
-    "facebook-token",
-    async function (err, user, info) {
-      if (err) res.status(401);
-      if (user) {
-        const currentUser = {
-          id_provider: user.id,
-          first_name: user.name.givenName,
-          last_name: user.name.familyName,
-          avatar: user._json.picture.data.url,
-          email: user.emails[0].value,
-        };
-        // const isExist = await authModel.checkExistUserThirdParty(
-        //   currentUser.id_provider
-        // );
-        // if (!isExist) {
-        //   const isSucess = await authModel.createThirdPartyUser(currentUser);
-        // }
-        const isExist = await authModel.checkExistUserFacebook(
-          currentUser.email
-        );
-        let isSuccess = {};
-        if (isExist && isExist.provider_id_fb === null) {
-          //exist with other authentication
-          isSuccess = await authModel.updateUserFacebook(currentUser, isExist);
-        } else if (!isExist) {
-          //not exist
-          isSuccess = await authModel.createUserFacebook(currentUser);
-        }
-        currentUser["id"] = isExist?.id || isSuccess?.id;
-        currentUser["first_name"] =
-          isExist?.first_name || isSuccess?.first_name;
-        currentUser["last_name"] = isExist?.last_name || isSuccess?.last_name;
-        currentUser["avatar"] = isExist?.avatar || isSuccess?.avatar;
-        currentUser["student_id"] =
-          isExist?.student_id || isSuccess?.student_id;
-        res.status(200).json({
-          user: currentUser,
-          access_token: jwt.sign(
-            currentUser,
-            process.env.ACCESS_TOKEN_SECRET_KEY,
-            {
-              expiresIn: "12h",
-            }
-          ),
-        });
-      } else {
-        res.status(401);
-      }
-    }
-  )(req, res, next);
 });
 
 router.post("/forgot-password", authController.forgotPassword);
