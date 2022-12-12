@@ -30,7 +30,9 @@ const send_single_mail = async (
   template,
   role
 ) => {
-  const senderDataUser = await classModel.getUserDataByEmail(sender_teacher_email);
+  const senderDataUser = await classModel.getUserDataByEmail(
+    sender_teacher_email
+  );
   let nameUser = "";
   if (!senderDataUser) {
   } else {
@@ -54,9 +56,17 @@ const send_single_mail = async (
     );
     if (checkExistStudent) return null;
   }
-  const isExist = await classModel.checkQueueUser(sender_teacher_email, classData.id, role);
+  const isExist = await classModel.checkQueueUser(
+    sender_teacher_email,
+    classData.id,
+    role
+  );
   if (!isExist) {
-    const result = await classModel.addQueueUser(sender_teacher_email, role, classData.id);
+    const result = await classModel.addQueueUser(
+      sender_teacher_email,
+      role,
+      classData.id
+    );
   }
   sendMail.setApiKey(process.env.KEY_API_EMAIL);
   const msg = {
@@ -64,13 +74,18 @@ const send_single_mail = async (
       email: sender_teacher_email,
     },
     from: {
-      email: "phucyugi@gmail.com",
+      email: "truongquocvuong1902@gmail.com",
       name: "The HCMUS team",
     },
     template_id: template,
     dynamic_template_data: {
       invite_teacher: nameUser,
-      api_join_class: call_back_api + `email=` + sender_teacher_email + `&class_id=` + classData.id,
+      api_join_class:
+        call_back_api +
+        `email=` +
+        sender_teacher_email +
+        `&class_id=` +
+        classData.id,
       class_name: classData.name,
     },
     hideWarnings: true,
@@ -81,7 +96,6 @@ const send_single_mail = async (
       return true;
     })
     .catch((error) => {
-      console.log(error);
       return false;
     });
 };
@@ -108,7 +122,6 @@ exports.inviteByMail = async (list_email, invite_code) => {
 exports.inviteByMailToStudent = async (list_email, invite_code) => {
   const error_list = [];
   for (const item of list_email) {
-    console.log(item.email);
     const isSucess = await send_single_mail(
       item.email,
       invite_code,
@@ -155,14 +168,20 @@ exports.joinClass = async (email, invite_code) => {
   if (!dataClass || !dataStudent) {
     return null;
   }
-  const isExist = await classModel.checkExistStudentInClass(dataClass.id, dataStudent.id);
+  const isExist = await classModel.checkExistStudentInClass(
+    dataClass.id,
+    dataStudent.id
+  );
   if (isExist) {
     data = {
       id_class: dataClass.id,
     };
     return data;
   }
-  const isExistTeacher = await classModel.checkExistTeacherInClass(dataClass.id, dataStudent.id);
+  const isExistTeacher = await classModel.checkExistTeacherInClass(
+    dataClass.id,
+    dataStudent.id
+  );
   if (isExistTeacher) {
     data = {
       id_class: dataClass.id,
@@ -201,8 +220,14 @@ exports.addQueueUser = async (email, class_id, role) => {
   if (!dataUser) {
     return null;
   }
-  const isExistStudent = await classModel.checkExistStudentInClass(class_id, dataUser.id);
-  const isExistTeacher = await classModel.checkExistTeacherInClass(class_id, dataUser.id);
+  const isExistStudent = await classModel.checkExistStudentInClass(
+    class_id,
+    dataUser.id
+  );
+  const isExistTeacher = await classModel.checkExistTeacherInClass(
+    class_id,
+    dataUser.id
+  );
   if (isExistStudent || isExistTeacher) {
     return null;
   }
@@ -308,7 +333,7 @@ exports.updateGradeStructure = async (object) => {
         subject_name: item.subject_name,
         grade: item.grade,
         order: item.order,
-        finalize: item.finalize
+        finalize: item.finalize,
       };
       if (item?.new) {
         await classModel.addSyllabusCheck(addItem);
@@ -335,23 +360,20 @@ exports.updateGradeStructure = async (object) => {
       list_syllabus: list_syll,
     };
   } catch (err) {
-    console.log(err);
     return null;
   }
 };
 
 exports.getGradeTable = async (class_id) => {
   const gradeStructure = await classModel.getGradeStructure(class_id);
-  console.log(gradeStructure);
-  // if (!gradeStructure || gradeStructure.length === 0) return null;
   const syllabus_list = await classModel.getSyllabus(gradeStructure[0]?.id);
-  let sql = `select temp1.*,ARRAY[`
+  let sql = `select temp1.*,ARRAY[`;
   let tail = `(select SUM(score) from (select s.* from grade_structure gs join syllabus s on s.grade_structure_id = gs.id where class_id = temp1.class_id) as temp2 join student_syllabus ss on temp2.id = ss.syllabus_id where ss.student_code = temp1.student_code)] as list_score
   from (select temp5.*, (case when cs.student_id is not null then true else false end) as isExist from (select csc.*, u.avatar, u.id as student_id from class_student_code csc 
     left join "user" u on u.student_id = csc.student_code where class_id = ${class_id}) as temp5
-    left join class_student cs on (cs.student_id = temp5.student_id and cs.class_id = ${class_id}) ) as temp1`
+    left join class_student cs on (cs.student_id = temp5.student_id and cs.class_id = ${class_id}) ) as temp1`;
   for (item of syllabus_list) {
-    sql += `(select ss.score from syllabus s join student_syllabus ss on s.id = ss.syllabus_id where s.id = ${item.id} and ss.student_code = temp1.student_code),`
+    sql += `(select ss.score from syllabus s join student_syllabus ss on s.id = ss.syllabus_id where s.id = ${item.id} and ss.student_code = temp1.student_code),`;
   }
   sql += tail;
   const grade_table_list = await classModel.querySelect(sql);
@@ -361,7 +383,7 @@ exports.getGradeTable = async (class_id) => {
     topic: gradeStructure[0]?.topic,
     description: gradeStructure[0]?.description,
     list_header: syllabus_list,
-    grade_table_list: grade_table_list
+    grade_table_list: grade_table_list,
   };
 };
 
@@ -384,82 +406,92 @@ exports.getGradePersonal = async (class_id, user_id) => {
 exports.getAllReviewByClassId = async (class_id) => {
   const result = await classModel.getAllGradeReviewByClassId(class_id);
   return result;
-}
+};
 
 exports.addReview = async (object) => {
-  // console.log(object);
   const result = await classModel.addReview(object);
   return result;
-}
+};
 
 exports.sendComment = async (object) => {
-  // console.log(global.io);
-  // io.emit("send_comment", object);
-  // console.log(io.sockets);
   const result = await classModel.addComment(object);
   return result;
-}
+};
 
 exports.getCommentByReviewId = async (review_id) => {
   const result = await classModel.getCommentByReviewId(review_id);
   return result;
-}
+};
 
 exports.updateStatusComment = async (review_id) => {
   const result = await classModel.updateStatusComment(review_id);
   return result;
-}
+};
 
 exports.updateReview = async (object) => {
   const result = await classModel.updateReview(object);
   const userInfo = await classModel.getInfoUserById(object.student_id);
-  console.log(userInfo);
-  const result3 = await classModel.updateScoreStudentSyllabus(object.final_score, userInfo.student_id, object.syllabus_id);
+  const result3 = await classModel.updateScoreStudentSyllabus(
+    object.final_score,
+    userInfo.student_id,
+    object.syllabus_id
+  );
   return result;
-}
+};
 
 exports.getListClassSubcribeSocket = async (object) => {
   const result = await classModel.getListClassSubcribeSocket(object);
   return result;
-}
+};
 
 exports.addNotificationPrivate = async (object) => {
   const result = await classModel.addNotificationPrivate(object);
   return result;
-}
+};
 
 exports.addNotificationPublic = async (object) => {
   const result = await classModel.addNotificationPublic(object);
   return result;
-}
+};
 
 exports.getAllNotification = async (user_id) => {
   const result = await classModel.getAllNotification(user_id);
   return result;
-}
+};
 
 exports.updateStatusNotification = async (object) => {
   const result = await classModel.updateStatusNotification(object);
   return result;
-}
+};
 
 exports.getAllInfoClass = async (pageSize, page, orderCreatedAt, search) => {
-  let allClass = await classModel.getAllClassroom(pageSize, page, orderCreatedAt, search);
+  let allClass = await classModel.getAllClassroom(
+    pageSize,
+    page,
+    orderCreatedAt,
+    search
+  );
   if (!allClass) {
     return [];
   }
   for (let class_info of allClass) {
-    class_info["grade_structure"] = await classModel.getSyllabusByClassId(class_info.id);
-    class_info["teachers"] = await classModel.getListTeacherByClassIdV2(class_info.id);
-    class_info["students"] = await classModel.getListStudentByClassIdV2(class_info.id);
+    class_info["grade_structure"] = await classModel.getSyllabusByClassId(
+      class_info.id
+    );
+    class_info["teachers"] = await classModel.getListTeacherByClassIdV2(
+      class_info.id
+    );
+    class_info["students"] = await classModel.getListStudentByClassIdV2(
+      class_info.id
+    );
   }
   return allClass;
-}
+};
 
 exports.getClassesCount = async () => {
   const result = await classModel.getClassesCount();
   return result;
-}
+};
 
 exports.joinClassByCodeBtn = async (student_id, join_code) => {
   const dataStudent = await classModel.getInfoUserById(student_id);
@@ -467,25 +499,35 @@ exports.joinClassByCodeBtn = async (student_id, join_code) => {
   if (!dataClass || !dataStudent) {
     return null;
   }
-  const isExist = await classModel.checkExistStudentInClass(dataClass.id, student_id);
+  const isExist = await classModel.checkExistStudentInClass(
+    dataClass.id,
+    student_id
+  );
   if (isExist) {
     return {
       status: "FAILED",
-      msg: "You have already joined this class!"
+      msg: "You have already joined this class!",
     };
   }
-  const isExistTeacher = await classModel.checkExistTeacherInClass(dataClass.id, student_id);
+  const isExistTeacher = await classModel.checkExistTeacherInClass(
+    dataClass.id,
+    student_id
+  );
   if (isExistTeacher) {
     return {
       status: "FAILED",
-      msg: "You have already joined this class!"
+      msg: "You have already joined this class!",
     };
   }
   // data = await classModel.joinClass(dataClass.id, student_id);
-  const result = await classModel.addQueueUser(dataStudent.email,"STUDENT",dataClass.id);
+  const result = await classModel.addQueueUser(
+    dataStudent.email,
+    "STUDENT",
+    dataClass.id
+  );
   return {
     status: "SUCCESS",
     msg: "Join class success!",
-    path: "/invite/" + dataClass.id + "?role=STUDENT"
+    path: "/invite/" + dataClass.id + "?role=STUDENT",
   };
-}
+};

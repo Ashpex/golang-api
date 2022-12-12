@@ -1,4 +1,3 @@
-const open = require("opn");
 const sendMailService = require("./sendMailService");
 
 exports.joinClassByEmail = async (req, res) => {
@@ -24,7 +23,10 @@ exports.joinClassByEmailStudent = async (req, res) => {
 };
 
 exports.acceptTeacher = async (req, res) => {
-  const data = await sendMailService.joinClass(req.body.email, req.body.class_id);
+  const data = await sendMailService.joinClass(
+    req.body.email,
+    req.body.class_id
+  );
   if (data) {
     res.status(200).json(data);
   } else {
@@ -33,7 +35,10 @@ exports.acceptTeacher = async (req, res) => {
 };
 
 exports.acceptStudent = async (req, res) => {
-  const data = await sendMailService.joinClassByStudentRole(req.body.email, req.body.class_id);
+  const data = await sendMailService.joinClassByStudentRole(
+    req.body.email,
+    req.body.class_id
+  );
   if (data) {
     res.status(200).json(data);
   } else {
