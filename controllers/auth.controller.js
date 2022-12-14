@@ -48,7 +48,7 @@ exports.changePassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    const user = await UserServices.resetPassword(req.body.email);
+    const user = await UserServices.resetPassword(req.decoded);
     if (user) {
       res.status(200).json(user);
     } else {

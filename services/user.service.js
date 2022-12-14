@@ -140,8 +140,8 @@ exports.changePassword = async (userId, oldPassword, newPassword) => {
   }
 };
 
-exports.resetPassword = async (email) => {
-  const user = await User.findOne({ email });
+exports.resetPassword = async (decoded) => {
+  const user = await User.findOne({ email: decoded.email });
   if (user) {
     user.password = bcrypt.hashSync("123456", 10);
     await user.save();
