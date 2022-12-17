@@ -1,4 +1,5 @@
 const UserServices = require("../services/user.service");
+const RoleInGroup = require("../enums/RoleInGroup.enum");
 
 exports.findAll = async (req, res) => {
   try {
@@ -76,6 +77,73 @@ exports.changePassword = async (req, res) => {
       res.status(200).json({ message: "Password changed successfully" });
     } else {
       res.status(401).json({ message: "Invalid password" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.joinGroupRoleMember = async (req, res) => {
+  try {
+    const user = await UserServices.joinGroup(
+      req.body.user_id,
+      req.body.group_id,
+      RoleInGroup.MEMBER
+    );
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.joinGroupRoleOwner = async (req, res) => {
+  try {
+    const user = await UserServices.joinGroup(
+      req.body.user_id,
+      req.body.group_id,
+      RoleInGroup.OWNER
+    );
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.joinGroupRoleCoOwner = async (req, res) => {
+  try {
+    const user = await UserServices.joinGroup(
+      req.body.user_id,
+      req.body.group_id,
+      RoleInGroup.CO_OWNER
+    );
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.leaveGroup = async (req, res) => {
+  try {
+    const user = await UserServices.leaveGroup(
+      req.body.user_id,
+      req.body.group_id
+    );
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ message: "User not found" });
     }
   } catch (err) {
     res.status(500).json({ message: err.message });

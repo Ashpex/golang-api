@@ -82,13 +82,17 @@ exports.isInGroup = async (userId, groupId) => {
   }
 };
 
-exports.joinGroup = async (userId, groupId) => {
+exports.joinGroup = async (userId, groupId, roleInGroup) => {
   const user = await User.findById(userId);
   if (user) {
     const group = await Group.findById(groupId);
     if (group) {
       user.groups.push(groupId);
       await user.save();
+      group.usersAndRoles.push({
+        user: userId,
+        role: roleInGroup,
+      });
       return true;
     } else {
       return false;
