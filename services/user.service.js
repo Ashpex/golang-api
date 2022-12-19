@@ -9,7 +9,10 @@ exports.findAll = async () => {
 };
 
 exports.findOne = async (userId) => {
-  return await User.findById(userId);
+  const user = await User.findById(userId);
+  user.password = undefined;
+
+  return user;
 };
 
 exports.findByEmail = async (email) => {
@@ -25,12 +28,13 @@ exports.create = async (user) => {
   return await newUser.save();
 };
 
-exports.update = async (user) => {
-  const existingUser = await User.findById(user._id);
+exports.updateById = async (userId, user) => {
+  const existingUser = await User.findById(userId);
   if (existingUser) {
-    const updatedUser = await User.findByIdAndUpdate(user._id, user, {
+    const updatedUser = await User.findByIdAndUpdate(userId, user, {
       new: true,
     });
+    updatedUser.password = undefined;
     return updatedUser;
   } else {
     return null;

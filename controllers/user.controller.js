@@ -40,10 +40,11 @@ exports.create = async (req, res) => {
   }
 };
 
-exports.update = async (req, res) => {
+exports.updateById = async (req, res) => {
   try {
-    const user = await UserServices.update(req.body);
+    const user = await UserServices.updateById(req.params.userId, req.body);
     if (user) {
+      user.password = undefined;
       res.status(200).json(user);
     } else {
       res.status(404).json({ message: "User not found" });
