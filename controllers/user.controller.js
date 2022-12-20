@@ -84,6 +84,22 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+exports.resetPassword = async (req, res) => {
+  try {
+    const user = await UserServices.resetPassword(
+      req.params.userId,
+      req.body.newPassword
+    );
+    if (user) {
+      res.status(200).json({ message: "Password reset successfully" });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.joinGroupRoleMember = async (req, res) => {
   try {
     const user = await UserServices.joinGroup(

@@ -12,4 +12,8 @@ router.put("/:userId", UserController.updateById);
 
 router.delete("/:userId", UserController.delete);
 
+router.put("/change-password/:userId", UserController.changePassword);
+
+router.put("/reset-password", UserController.resetPassword);
+
 module.exports = router;
