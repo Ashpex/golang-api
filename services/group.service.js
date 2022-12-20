@@ -5,14 +5,17 @@ exports.findAllGroupByUserId = async (userId) => {
   return await Group.find({ "usersAndRoles.user": userId });
 };
 
+exports.findAll = async () => {
+  return await Group.find();
+};
+
 exports.findGroupById = async (groupId) => {
   return await Group.findById(groupId);
 };
 
 exports.createGroup = async (group) => {
   const newGroup = new Group(group);
-  await newGroup.save();
-  return newGroup;
+  return await newGroup.save();
 };
 
 exports.updateGroup = async (group) => {

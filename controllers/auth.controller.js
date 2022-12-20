@@ -63,12 +63,13 @@ exports.googleLogin = async (req, res) => {
   try {
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
     const ticket = await client.verifyIdToken({
-      idToken: req.body.token,
+      idToken: req.body.tokenId,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
     const user = await UserServices.googleLogin(payload);
     if (user) {
+      user.password = undefined;
       res.status(200).json(user);
     } else {
       res.status(400).json({ message: "Invalid credentials" });

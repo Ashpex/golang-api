@@ -195,9 +195,13 @@ exports.register = async (user) => {
 };
 
 exports.googleLogin = async (payload) => {
-  const user = await User.findOne({ email: email, isLoggedInWithGoogle: true });
+  const user = await User.findOne({
+    email: payload.email,
+    isLoggedInWithGoogle: true,
+  });
   if (user) {
     const token = await this.generateJWT(user);
+    user.password = undefined;
     return { user, token };
   } else {
     const newUser = new User({
@@ -211,6 +215,7 @@ exports.googleLogin = async (payload) => {
     });
     const savedUser = await newUser.save();
     const token = await this.generateJWT(savedUser);
+    savedUser.password = undefined;
     return { user: savedUser, token };
   }
 };
