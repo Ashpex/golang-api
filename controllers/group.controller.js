@@ -1,8 +1,10 @@
 const GroupService = require("../services/group.service");
 
-exports.getGroups = async (req, res) => {
+exports.getGroupsOwner = async (req, res) => {
   try {
-    const groups = await GroupService.findAll();
+    const groups = await GroupService.findAllGroupsOwnedByUserId(
+      req.params.userId
+    );
     if (groups) {
       res.status(200).json(groups);
     } else {

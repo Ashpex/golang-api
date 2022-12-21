@@ -5,6 +5,7 @@ const databaseService = require("./services/database.service");
 const verifyToken = require("./middlewares/auth.middleware");
 const UserRoute = require("./routes/user.route");
 const AuthRoute = require("./routes/auth.route");
+const GroupRoute = require("./routes/group.route");
 require("dotenv").config();
 
 databaseService.connectDatabase();
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api/auth", AuthRoute);
 app.use("/api/users", verifyToken, UserRoute);
+app.use("/api/groups", verifyToken, GroupRoute);
 
 app.use(function (req, res) {
   res.status(404).send({ url: req.originalUrl + " not found" });

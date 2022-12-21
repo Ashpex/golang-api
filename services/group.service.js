@@ -1,12 +1,21 @@
 const Group = require("../models/group.model");
+const RoleInGroup = require("../enums/RoleInGroup.enum");
 require("dotenv").config();
 
 exports.findAllGroupByUserId = async (userId) => {
   return await Group.find({ "usersAndRoles.user": userId });
 };
 
-exports.findAll = async () => {
-  return await Group.find();
+exports.findAllGroupsOwnedByUserId = async (userId) => {
+  return await Group.find({
+    userCreated: userId,
+    usersAndRoles: {
+      $elemMatch: {
+        user: userId,
+        role: RoleInGroup.OWNER,
+      },
+    },
+  });
 };
 
 exports.findGroupById = async (groupId) => {
@@ -14,7 +23,17 @@ exports.findGroupById = async (groupId) => {
 };
 
 exports.createGroup = async (group) => {
-  const newGroup = new Group(group);
+  const newGroup = new Group({
+    name: group.name,
+    description: group.description,
+    userCreated: group.createdUserId,
+    usersAndRoles: [
+      {
+        user: group.createdUserId,
+        role: RoleInGroup.OWNER,
+      },
+    ],
+  });
   return await newGroup.save();
 };
 
