@@ -70,8 +70,38 @@ exports.deleteGroup = async (groupId) => {
 exports.isInGroup = async (userId, groupId) => {
   const group = await Group.findById(groupId);
   if (group) {
-    return group.usersAndRoles.some((user) => user.user == userId);
+    return group.usersAndRoles.some(
+      (user) => user.user.toString() === userId.toString()
+    );
   } else {
     return false;
+  }
+};
+
+exports.addUserToGroup = async (groupId, userId, userRole) => {
+  const group = await Group.findById(groupId);
+  if (group) {
+    const user = await User.findById(userId);
+    if (user) {
+      const userAndRole = {
+        user: userId,
+        role: userRole,
+      };
+      group.usersAndRoles.push(userAndRole);
+      await group.save();
+
+      user.groups.push(groupId);
+      await user.save();
+
+      user.password = undefined;
+      return {
+        ...group._doc,
+        newMember: user,
+      };
+    } else {
+      throw new Error("User not found");
+    }
+  } else {
+    throw new Error("Group not found");
   }
 };

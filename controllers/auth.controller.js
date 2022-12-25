@@ -24,7 +24,12 @@ exports.register = async (req, res) => {
     if (user) {
       const token = await UserServices.generateJWT(user);
       const url = `${process.env.CLIENT_URL_DEV}/user/verify-email/${token}`;
-      await EmailServices.sendEmail(user.email, url);
+      await EmailServices.sendEmail(user.email, {
+        subjectMail: "Verify your email",
+        titleContentMail: "Verify your email to finish signing up",
+        url,
+        isEmailVerified: true,
+      });
 
       res.status(201).json(user);
     } else {

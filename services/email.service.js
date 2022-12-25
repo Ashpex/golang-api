@@ -20,15 +20,18 @@ const handlebarOptions = {
 
 transporter.use("compile", hbs(handlebarOptions));
 
-exports.sendEmail = async (email, url) => {
+exports.sendEmail = async (email, content) => {
   const mailOptions = {
     from: "letrongtan1902@gmail.com",
-    to: "nguyenhuuan1902@gmail.com",
-    subject: "Verify your email",
+    to: email,
+    subject: content.subjectMail,
     template: "email",
     context: {
-      email: email,
-      url: url,
+      title: content.titleContentMail,
+      email: email || "",
+      groupName: content.groupName || "",
+      url: content.url || "",
+      isEmailVerified: content.isEmailVerified || false,
     },
   };
 

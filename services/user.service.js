@@ -15,7 +15,7 @@ exports.findOne = async (userId) => {
   return user;
 };
 
-exports.findByEmail = async (email) => {
+exports.findUserByEmail = async (email) => {
   return await User.findOne({ email: email });
 };
 
