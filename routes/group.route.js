@@ -20,4 +20,6 @@ router.post("/invite/:groupId", GroupController.inviteUserByEmail);
 
 router.post("/joinGroup/:groupId", GroupController.joinGroup);
 
+router.get("/:groupId/remove/:userId", GroupController.removeUser);
+
 module.exports = router;

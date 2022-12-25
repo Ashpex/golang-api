@@ -147,3 +147,34 @@ exports.joinGroup = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.removeUser = async (req, res) => {
+  try {
+    const group = await GroupService.findGroupById(req.params.groupId);
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    const user = await UserService.findOne(req.params.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isInGroup = await GroupService.isInGroup(user._id, group._id);
+
+    if (!isInGroup) {
+      return res.status(400).json({ message: "User not in group" });
+    }
+
+    const groupUser = await GroupService.removeUserFromGroup(
+      group._id,
+      user._id
+    );
+
+    res.status(200).json(groupUser);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

@@ -120,3 +120,31 @@ exports.addUserToGroup = async (groupId, userId, userRole) => {
     throw new Error("Group not found");
   }
 };
+
+exports.removeUserFromGroup = async (groupId, userId) => {
+  const group = await Group.findById(groupId);
+  if (group) {
+    const user = await User.findById(userId);
+    if (user) {
+      group.usersAndRoles = group.usersAndRoles.filter(
+        (userAndRole) => userAndRole.user.toString() !== userId.toString()
+      );
+      await group.save();
+
+      user.groups = user.groups.filter(
+        (group) => group.toString() !== groupId.toString()
+      );
+      await user.save();
+
+      user.password = undefined;
+      return {
+        ...group._doc,
+        removedMember: user,
+      };
+    } else {
+      throw new Error("User not found");
+    }
+  } else {
+    throw new Error("Group not found");
+  }
+};
