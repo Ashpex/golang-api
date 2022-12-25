@@ -1,36 +1,42 @@
-const sendGridMail = require("@sendgrid/mail");
-sendGridMail.setApiKey(process.env.SENDGRID_API_KEY);
-function getOrderConfirmationEmailHtml(customerName, orderNr) {
-  return `<p>hello ${customerName} </p>`;
-}
+const nodemailer = require("nodemailer");
+const hbs = require("nodemailer-express-handlebars");
+const path = require("path");
 
-function getMessage(emailParams) {
-  return {
-    to: emailParams.toEmail,
-    from: "geshan@yipl.com.np",
-    subject: "We have got your order, you will receive it soon",
-    text: `Hey ${emailParams.name}, we have received your order ${emailParams.orderNr}. We will ship it soon`,
-    html: getOrderConfirmationEmailHtml(emailParams.name, emailParams.orderNr),
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "letrongtan1902@gmail.com",
+    pass: "cwakmafbjdyfobsl",
+  },
+});
+
+const handlebarOptions = {
+  viewEngine: {
+    partialsDir: path.resolve("./views/"),
+    defaultLayout: false,
+  },
+  viewPath: path.resolve("./views/"),
+};
+
+transporter.use("compile", hbs(handlebarOptions));
+
+exports.sendEmail = async (email, url) => {
+  const mailOptions = {
+    from: "letrongtan1902@gmail.com",
+    to: "nguyenhuuan1902@gmail.com",
+    subject: "Verify your email",
+    template: "email",
+    context: {
+      email: email,
+      url: url,
+    },
   };
-}
 
-async function sendOrderConfirmation(emailParams) {
-  try {
-    await sendGridMail.send(getMessage(emailParams));
-    return {
-      message: `Order confirmation email sent successfully for orderNr: ${emailParams.orderNr}`,
-    };
-  } catch (error) {
-    const message = `Error sending order confirmation email or orderNr: ${emailParams.orderNr}`;
-    console.error(message);
-    console.error(error);
-    if (error.response) {
-      console.error(error.response.body);
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
     }
-    return { message };
-  }
-}
-
-module.exports = {
-  sendOrderConfirmation,
+  });
 };

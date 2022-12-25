@@ -66,7 +66,8 @@ exports.verifyEmail = async (verificationCode) => {
   if (user) {
     user.isEmailVerified = true;
     await user.save();
-    return true;
+    user.password = undefined;
+    return user;
   } else {
     return false;
   }
@@ -170,7 +171,7 @@ exports.login = async (email, password) => {
     if (isMatch) {
       const token = await this.generateJWT(user);
       user.password = undefined;
-      return { user, token };
+      return { user, token, isEmailVerified: user.isEmailVerified };
     } else {
       return null;
     }
