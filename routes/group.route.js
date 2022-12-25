@@ -6,7 +6,7 @@ router.get("/owner/:userId", GroupController.getGroupsOwner);
 
 router.get("/:id", GroupController.getGroupById);
 
-router.get("/user/:id", GroupController.getGroupsByUserId);
+router.get("/users/:id", GroupController.getAllGroupsByUserId);
 
 router.post("/", GroupController.createGroup);
 

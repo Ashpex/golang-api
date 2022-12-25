@@ -30,9 +30,9 @@ exports.getGroupById = async (req, res) => {
   }
 };
 
-exports.getGroupsByUserId = async (req, res) => {
+exports.getAllGroupsByUserId = async (req, res) => {
   try {
-    const groups = await GroupService.findAllGroupByUserId(req.params.id);
+    const groups = await GroupService.findAllGroupsByUserId(req.params.id);
     if (groups) {
       res.status(200).json(groups);
     } else {
