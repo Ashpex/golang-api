@@ -22,4 +22,6 @@ router.post("/joinGroup/:groupId", GroupController.joinGroup);
 
 router.get("/:groupId/remove/:userId", GroupController.removeUser);
 
+router.get("/:groupId/leaveGroup/:userId", GroupController.removeUser);
+
 module.exports = router;
