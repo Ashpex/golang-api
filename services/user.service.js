@@ -10,7 +10,9 @@ exports.findAll = async () => {
 
 exports.findOne = async (userId) => {
   const user = await User.findById(userId);
-  user.password = undefined;
+  if (user) {
+    user.password = undefined;
+  }
 
   return user;
 };

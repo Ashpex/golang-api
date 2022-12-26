@@ -24,4 +24,8 @@ router.get("/:groupId/remove/:userId", GroupController.removeUser);
 
 router.get("/:groupId/leaveGroup/:userId", GroupController.removeUser);
 
+router.post("/:groupId/changeRole/:userId", GroupController.changeUserRole);
+
+router.delete("/:groupId", GroupController.deleteGroup);
+
 module.exports = router;

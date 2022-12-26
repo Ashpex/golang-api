@@ -148,3 +148,47 @@ exports.removeUserFromGroup = async (groupId, userId) => {
     throw new Error("Group not found");
   }
 };
+
+exports.changeUserRole = async (groupId, userId, newRole) => {
+  const group = await Group.findById(groupId);
+  if (group) {
+    const user = await User.findById(userId);
+    if (user) {
+      group.usersAndRoles = group.usersAndRoles.map((userAndRole) => {
+        if (userAndRole.user.toString() === userId.toString()) {
+          return {
+            ...userAndRole._doc,
+            role: newRole,
+          };
+        } else {
+          return userAndRole;
+        }
+      });
+      await group.save();
+      return group;
+    } else {
+      throw new Error("User not found");
+    }
+  } else {
+    throw new Error("Group not found");
+  }
+};
+
+exports.deleteGroup = async (groupId) => {
+  const group = await Group.findById(groupId);
+  if (group) {
+    const users = await User.find({
+      _id: { $in: group.usersAndRoles.map((user) => user.user) },
+    });
+    users.forEach((user) => {
+      user.groups = user.groups.filter(
+        (group) => group.toString() !== groupId.toString()
+      );
+      user.save();
+    });
+    await Group.findByIdAndDelete(groupId);
+    return group;
+  } else {
+    throw new Error("Group not found");
+  }
+};
