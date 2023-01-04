@@ -9,6 +9,7 @@ const UserSchema = new Schema({
   isLoggedInWithGoogle: { type: Boolean, default: false },
   isEmailVerified: { type: Boolean, default: false },
   groups: [{ type: Schema.Types.ObjectId }],
+  presentations: [{ type: Schema.Types.ObjectId }],
 });
 
 const User = mongoose.model("User", UserSchema);
