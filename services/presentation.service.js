@@ -78,5 +78,15 @@ exports.updateSlide = async (slide) => {
   const updatedSlide = await Slide.findOneAndUpdate({ _id: slide.id }, slide, {
     new: true,
   });
+
   return updatedSlide;
+};
+
+exports.deleteSlide = async (slideId, presentationId) => {
+  const deletedSlide = await Slide.findOneAndDelete({ _id: slideId });
+  await Presentation.findOneAndUpdate(
+    { _id: presentationId },
+    { $pull: { slides: deletedSlide._id } }
+  );
+  return deletedSlide;
 };
