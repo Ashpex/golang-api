@@ -24,6 +24,10 @@ app.use("/api/groups", verifyToken, GroupRoute);
 app.use("/api/presentations", verifyToken, PresentationRoute);
 app.use("/api/messages", verifyToken, MessageRoute);
 
+app.use("/api", (req, res) => {
+  res.json("Welcome api Class Group!");
+});
+
 app.use(function (req, res) {
   res.status(404).send({ url: req.originalUrl + " not found" });
 });
