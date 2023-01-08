@@ -5,8 +5,8 @@ const path = require("path");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "letrongtan1902@gmail.com",
-    pass: "cwakmafbjdyfobsl",
+    user: "peaky.blinders.2404@gmail.com",
+    pass: "zmrrnszhumfayuyv",
   },
 });
 
@@ -22,7 +22,7 @@ transporter.use("compile", hbs(handlebarOptions));
 
 exports.sendEmail = async (email, content) => {
   const mailOptions = {
-    from: "letrongtan1902@gmail.com",
+    from: "peaky.blinders.2404@gmail.com",
     to: email,
     subject: content.subjectMail,
     template: "email",
@@ -31,6 +31,7 @@ exports.sendEmail = async (email, content) => {
       email: email || "",
       groupName: content.groupName || "",
       url: content.url || "",
+
       isEmailVerified: content.isEmailVerified || false,
     },
   };
