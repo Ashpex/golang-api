@@ -7,6 +7,7 @@ const UserRoute = require("./routes/user.route");
 const AuthRoute = require("./routes/auth.route");
 const GroupRoute = require("./routes/group.route");
 const PresentationRoute = require("./routes/presentation.route");
+const MessageRoute = require("./routes/message.route");
 require("dotenv").config();
 
 databaseService.connectDatabase();
@@ -21,11 +22,32 @@ app.use("/api/auth", AuthRoute);
 app.use("/api/users", verifyToken, UserRoute);
 app.use("/api/groups", verifyToken, GroupRoute);
 app.use("/api/presentations", verifyToken, PresentationRoute);
+app.use("/api/messages", verifyToken, MessageRoute);
 
 app.use(function (req, res) {
   res.status(404).send({ url: req.originalUrl + " not found" });
 });
 
-app.listen(process.env.PORT || 5000, () => {
+const server = app.listen(process.env.PORT || 5000, () => {
   console.log(`App listening on port ${process.env.PORT || 5000}`);
+});
+
+const socketIo = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+socketIo.on("connection", (socket) => {
+  socket.on("memberAnswer", function (data) {
+    socketIo.emit("memberAnswer", { data });
+  });
+
+  socket.on("updateOptions", function (data) {
+    socketIo.emit("updateOptions", { data });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
 });

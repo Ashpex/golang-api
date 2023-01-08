@@ -62,7 +62,7 @@ exports.deletePresentation = async (req, res) => {
 exports.getAllSlides = async (req, res) => {
   try {
     const presentation = await PresentationService.findPresentationById(
-      req.params.presentationId,
+      req.query.presentationId,
       req.query.userId
     );
 
@@ -117,6 +117,49 @@ exports.deleteSlide = async (req, res) => {
         req.body.presentationId
       );
       res.status(200).json(deletedSlide);
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getSlideById = async (req, res) => {
+  try {
+    const slide = await PresentationService.findSlideById(req.params.slideId);
+    if (!slide) {
+      res.status(404).json({ message: "Slide not found" });
+    } else {
+      res.status(200).json(slide);
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.answerSlide = async (req, res) => {
+  try {
+    const slide = await PresentationService.findSlideById(req.params.slideId);
+    if (!slide) {
+      res.status(404).json({ message: "Slide not found" });
+    } else {
+      const updatedSlide = {
+        ...slide._doc,
+        options: slide.options.map((option) => {
+          if (option._id.toString() === req.body.answerId.toString()) {
+            return {
+              ...option._doc,
+              quantity: option.quantity + 1,
+            };
+          }
+          return option;
+        }),
+      };
+      const updatedSlideInDb = await PresentationService.updateSlide({
+        ...updatedSlide,
+        id: updatedSlide._id,
+      });
+
+      res.status(200).json(updatedSlideInDb);
     }
   } catch (err) {
     res.status(500).json({ message: err.message });
