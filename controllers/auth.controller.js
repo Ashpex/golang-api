@@ -102,3 +102,37 @@ exports.verifyEmail = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const user = await UserServices.findUserByEmail(req.body.email);
+    if (user) {
+      const token = await UserServices.generateJWT(user);
+      const url = `${process.env.CLIENT_URL_DEV}/user/reset-password/${token}`;
+      console.log("url", url);
+      await EmailServices.sendEmail(user.email, {
+        subjectMail: "Reset your password",
+        titleContentMail: "Reset your password",
+        url,
+      });
+      res.status(200).json({ message: "Email sent" });
+    } else {
+      res.status(400).json({ message: "Invalid credentials" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.resetPasswordToken = async (req, res) => {
+  const token = req.params.token;
+  console.log("token", token);
+  const newPassword = req.body.password;
+  const user = await UserServices.resetPasswordToken(token, newPassword);
+
+  if (user) {
+    res.status(200).json({ message: "Password reset successfully" });
+  } else {
+    res.status(400).json({ message: "Please email check again" });
+  }
+};

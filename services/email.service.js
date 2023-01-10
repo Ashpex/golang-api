@@ -31,7 +31,7 @@ exports.sendEmail = async (email, content) => {
       email: email || "",
       groupName: content.groupName || "",
       url: content.url || "",
-
+      isGroupJoined: content.isGroupJoined || false,
       isEmailVerified: content.isEmailVerified || false,
     },
   };
