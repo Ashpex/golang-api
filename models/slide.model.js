@@ -8,7 +8,11 @@ const SlideSchema = new Schema({
       quantity: Number,
     },
   ],
+  type: { type: String, default: "" },
   answer: { type: String, default: "" },
+  heading: { type: String, default: "" },
+  subHeading: { type: String, default: "" },
+  paragraph: { type: String, default: "" },
   presentationId: { type: Schema.Types.ObjectId },
   createdAt: { type: Date, default: Date.now },
 });
