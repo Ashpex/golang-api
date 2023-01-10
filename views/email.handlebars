@@ -112,7 +112,8 @@
                     "
                     > {{email}} </strong>&nbsp;is your email address by clicking
                     on the button below
-                  {{else}}
+
+                  {{else if isGroupJoined}}
                     To join the group
                     <strong
                       style="
@@ -122,7 +123,8 @@
                     "
                     > {{groupName}} </strong>&nbsp;by email, please click on the
                     button below
-
+                  {{else}}
+                    To reset your password, please click on the button below
                   {{/if}}
 
                 </p>
@@ -166,8 +168,10 @@
 
                     {{#if isEmailVerified}}
                       Verify my email
-                    {{else}}
+                    {{else if isGroupJoined}}
                       Join the group
+                    {{else}}
+                      Reset Password
                     {{/if}}
 
                   </a></span>
@@ -176,8 +180,7 @@
           </table>
         </td>
       </tr>
-    </table>center">
-                <img=
+    </table>
 
   </body>
 </html>

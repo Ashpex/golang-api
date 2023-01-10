@@ -75,6 +75,18 @@ exports.verifyEmail = async (verificationCode) => {
   }
 };
 
+exports.resetPasswordToken = async (token, newPassword) => {
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findOne({ email: decoded.email });
+  console.log("newPassword", newPassword);
+  if (user) {
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    user.password = undefined;
+    return user;
+  }
+};
+
 exports.isInGroup = async (userId, groupId) => {
   const user = await User.findById(userId);
   if (user) {
@@ -168,6 +180,7 @@ exports.login = async (email, password) => {
     email: email,
     isLoggedInWithGoogle: false,
   });
+  console.log(user);
   if (user) {
     const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) {
