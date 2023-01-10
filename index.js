@@ -55,6 +55,11 @@ socketIo.on("connection", (socket) => {
     socketIo.emit("getMessages", { data });
   });
 
+  socket.on("createSlideShow", function (data) {
+    console.log("createSlideShow", data);
+    socketIo.emit("createSlideShow", { data });
+  });
+
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
