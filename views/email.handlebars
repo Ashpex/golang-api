@@ -1,0 +1,183 @@
+<html>
+  <head>
+    <title>Verify Email</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <table align="center">
+      <tr>
+        <td style="padding: 0; margin: 0; width: 660px">
+          <table>
+            <tr>
+              <td align="center">
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/2989/2989993.png"
+                  alt="letter"
+                  width="100"
+                />
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding: 0; margin: 0">
+                <h2
+                  style="
+                    margin: 0;
+                    line-height: 43px;
+                    font-family: Montserrat, sans-serif;
+                    font-size: 36px;
+                    font-style: normal;
+                    font-weight: normal;
+                    color: #333333;
+                  "
+                >
+                  {{title}}
+                </h2>
+              </td>
+            </tr>
+            <tr>
+              <td
+                align="center"
+                style="
+                  padding: 0;
+                  margin: 0;
+                  padding-top: 10px;
+                  padding-bottom: 10px;
+                  font-size: 0;
+                "
+              >
+                <table
+                  border="0"
+                  width="40%"
+                  height="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="
+                    border-collapse: collapse;
+                    border-spacing: 0px;
+                    width: 40% !important;
+                    display: inline-table;
+                  "
+                >
+                  <tr>
+                    <td
+                      style="
+                        border-bottom: 1px solid #cccccc;
+                        background: none;
+                        height: 1px;
+                        width: 100%;
+                        margin: 0px;
+                      "
+                    ></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center">
+                <p
+                  style="
+                    margin: 0;
+                    font-family: Montserrat, sans-serif;
+                    line-height: 24px;
+                    color: #333333;
+                    font-size: 16px;
+                  "
+                >
+                  Thank you for choosing our service
+                </p>
+                <p style="line-height: 24px">
+                  <br />
+                </p>
+                <p
+                  style="
+                    margin: 0;
+                    font-family: Montserrat, sans-serif;
+                    line-height: 24px;
+                    color: #333333;
+                    font-size: 16px;
+                  "
+                >
+
+                  {{#if isEmailVerified}}
+                    Please confirm that
+                    <strong
+                      style="
+                      text-decoration: none;
+                      color: #134f5c;
+                      font-size: 16px;
+                    "
+                    > {{email}} </strong>&nbsp;is your email address by clicking
+                    on the button below
+                  {{else}}
+                    To join the group
+                    <strong
+                      style="
+                      text-decoration: none;
+                      color: #134f5c;
+                      font-size: 16px;
+                    "
+                    > {{groupName}} </strong>&nbsp;by email, please click on the
+                    button below
+
+                  {{/if}}
+
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center">
+                <span
+                  style="
+                    border-style: solid;
+                    border-color: #999999;
+                    background: #ffffff;
+                    border-width: 1px;
+                    display: inline-block;
+                    border-radius: 0px;
+                    margin-top: 20px;
+                  "
+                ><a
+                    href="{{url}}"
+                    target="_blank"
+                    style="
+                      text-decoration: none;
+
+                      color: #666666;
+                      font-size: 16px;
+                      border-style: solid;
+                      border-color: #ffffff;
+                      border-width: 10px 30px 10px 30px;
+                      display: inline-block;
+                      background: #ffffff;
+                      border-radius: 0px;
+                      font-family: Montserrat, sans-serif;
+                      font-weight: normal;
+                      font-style: normal;
+                      line-height: 19px;
+                      width: auto;
+                      text-align: center;
+                    "
+                  >
+
+                    {{#if isEmailVerified}}
+                      Verify my email
+                    {{else}}
+                      Join the group
+                    {{/if}}
+
+                  </a></span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>center">
+                <img=
+
+  </body>
+</html>
