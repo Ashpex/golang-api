@@ -51,6 +51,10 @@ socketIo.on("connection", (socket) => {
     socketIo.emit("updateOptions", { data });
   });
 
+  socket.on("getMessages", function (data) {
+    socketIo.emit("getMessages", { data });
+  });
+
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
