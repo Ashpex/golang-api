@@ -16,10 +16,18 @@ exports.getAllPresentations = async (req, res) => {
 
 exports.getPresentationById = async (req, res) => {
   try {
-    const presentation = await PresentationService.findPresentationById(
-      req.params.presentationId,
-      req.query.userId
-    );
+    let presentation = null;
+    if (req.query.userId) {
+      presentation = await PresentationService.findPresentationById(
+        req.params.presentationId,
+        req.query.userId
+      );
+    } else {
+      presentation = await PresentationService.findPresentationById(
+        req.params.presentationId
+      );
+    }
+
     if (presentation) {
       res.status(200).json(presentation);
     } else {
@@ -160,6 +168,26 @@ exports.answerSlide = async (req, res) => {
       });
 
       res.status(200).json(updatedSlideInDb);
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getFirstSlide = async (req, res) => {
+  try {
+    const presentation = await PresentationService.findPresentationById(
+      req.query.presentationId
+    );
+
+    if (presentation) {
+      const slide = await PresentationService.findSlideById(
+        presentation.slides[0]
+      );
+
+      res.status(200).json(slide);
+    } else {
+      res.status(404).json({ message: "Presentation not found" });
     }
   } catch (err) {
     res.status(500).json({ message: err.message });

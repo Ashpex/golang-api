@@ -8,11 +8,18 @@ exports.findAllPresentationsByUserId = async (userId) => {
 };
 
 exports.findPresentationById = async (presentationId, userId) => {
-  const presentation = await Presentation.findOne({
-    _id: presentationId,
-    userId: userId,
-  });
-  return presentation;
+  if (userId) {
+    const presentation = await Presentation.findOne({
+      _id: presentationId,
+      userId: userId,
+    });
+    return presentation;
+  } else {
+    const presentation = await Presentation.findOne({
+      _id: presentationId,
+    });
+    return presentation;
+  }
 };
 
 exports.createPresentation = async (presentation) => {

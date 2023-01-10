@@ -14,6 +14,8 @@ router.put("/:presentationId", PresentationController.updatePresentation);
 
 router.delete("/:presentationId", PresentationController.deletePresentation);
 
+router.get("/slides/first", PresentationController.getFirstSlide);
+
 router.get("/slides/:slideId", PresentationController.getSlideById);
 
 router.post("/slides", PresentationController.createSlide);
