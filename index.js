@@ -56,8 +56,11 @@ socketIo.on("connection", (socket) => {
   });
 
   socket.on("createSlideShow", function (data) {
-    console.log("createSlideShow", data);
     socketIo.emit("createSlideShow", { data });
+  });
+
+  socket.on("changeSlide", function (data) {
+    socketIo.emit("changeSlide", { data });
   });
 
   socket.on("disconnect", () => {
